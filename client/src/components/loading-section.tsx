@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
-import { Check, Loader2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Search, Globe, Zap, CheckCircle } from "lucide-react";
 import { type Audit } from "@shared/schema";
 
 interface LoadingSectionProps {
@@ -18,31 +19,54 @@ export default function LoadingSection({ auditId }: LoadingSectionProps) {
     return null;
   }
 
+  // Simulate progress based on time elapsed
+  const progress = Math.min(95, Math.random() * 80 + 10);
+
   return (
     <section className="py-20 bg-white">
       <div className="max-w-4xl mx-auto px-4 text-center">
         <Card className="bg-white rounded-2xl shadow-xl border border-neutral-100">
           <CardContent className="p-12">
-            <div className="animate-spin w-16 h-16 border-4 border-brand-blue border-t-transparent rounded-full mx-auto mb-6"></div>
-            <h2 className="text-2xl font-bold text-neutral-900 mb-4">
-              Auditing Your Brand Presence...
+            <h2 className="text-3xl font-bold text-neutral-900 mb-2">
+              Analyzing Your Media Presence
             </h2>
             <p className="text-neutral-600 mb-8">
-              Searching across {audit?.totalPublications || 30}+ major news publications
+              Scanning major publications and analyzing mentions with AI
             </p>
             
-            <div className="space-y-3 max-w-md mx-auto">
-              <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
-                <span className="text-sm text-neutral-700">finance.yahoo.com</span>
-                <Check className="w-5 h-5 text-brand-green" />
+            <div className="mb-8">
+              <Progress value={progress} className="w-full h-3 mb-4" />
+              <p className="text-sm text-neutral-500 mb-2">{Math.round(progress)}% complete</p>
+              <p className="text-sm text-neutral-600">Currently checking: major news outlets</p>
+            </div>
+            
+            <div className="space-y-4 max-w-lg mx-auto">
+              <div className="flex items-center p-4 bg-blue-50 rounded-xl border border-blue-100">
+                <div className="w-10 h-10 bg-brand-blue rounded-full flex items-center justify-center mr-4">
+                  <Search className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-brand-blue font-medium flex-1 text-left">Scanning 30+ major news outlets</span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
-                <span className="text-sm text-neutral-700">marketwatch.com</span>
-                <Loader2 className="w-4 h-4 animate-spin text-brand-blue" />
+              
+              <div className="flex items-center p-4 bg-neutral-50 rounded-xl">
+                <div className="w-10 h-10 bg-neutral-300 rounded-full flex items-center justify-center mr-4">
+                  <Globe className="w-5 h-5 text-neutral-600" />
+                </div>
+                <span className="text-neutral-600 flex-1 text-left">Analyzing brand mentions with AI</span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg opacity-50">
-                <span className="text-sm text-neutral-700">apnews.com</span>
-                <div className="w-4 h-4 border-2 border-neutral-200 rounded-full"></div>
+              
+              <div className="flex items-center p-4 bg-neutral-50 rounded-xl">
+                <div className="w-10 h-10 bg-neutral-300 rounded-full flex items-center justify-center mr-4">
+                  <Zap className="w-5 h-5 text-neutral-600" />
+                </div>
+                <span className="text-neutral-600 flex-1 text-left">Processing coverage insights</span>
+              </div>
+              
+              <div className="flex items-center p-4 bg-neutral-50 rounded-xl">
+                <div className="w-10 h-10 bg-neutral-300 rounded-full flex items-center justify-center mr-4">
+                  <CheckCircle className="w-5 h-5 text-neutral-600" />
+                </div>
+                <span className="text-neutral-600 flex-1 text-left">Generating strategic report</span>
               </div>
             </div>
           </CardContent>

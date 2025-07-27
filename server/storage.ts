@@ -50,6 +50,7 @@ export class MemStorage implements IStorage {
       mentionsFound: insertAudit.mentionsFound || null,
       coverageRate: insertAudit.coverageRate || null,
       topSource: insertAudit.topSource || null,
+      shareableLink: null,
       createdAt: new Date(),
       completedAt: null
     };

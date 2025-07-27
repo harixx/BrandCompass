@@ -82,34 +82,34 @@ async function processAuditAsync(auditId: string, brandName: string) {
     const mentionedDomains: string[] = [];
 
     // Process each publication
-    for (const domain of NEWS_PUBLICATIONS) {
+    for (const publication of NEWS_PUBLICATIONS) {
       try {
-        console.log(`Searching ${domain} for "${brandName}"`);
+        console.log(`Searching ${publication.name} for "${brandName}"`);
         
-        const searchResults = await serperService.searchDomain(domain, brandName);
+        const searchResults = await serperService.searchDomain(publication.domain, brandName);
         const classification = await openaiService.classifyMention(brandName, searchResults);
         
         const result: AuditResult = {
-          domain,
+          domain: publication.domain,
           brandMentioned: classification.brandMentioned,
           title: classification.title,
           snippet: classification.snippet,
           url: classification.url,
-          logo: `https://www.google.com/s2/favicons?domain=${domain}&sz=32`
+          logo: `https://www.google.com/s2/favicons?domain=${publication.domain}&sz=32`
         };
 
         results.push(result);
 
         if (classification.brandMentioned) {
           mentionsFound++;
-          mentionedDomains.push(domain);
+          mentionedDomains.push(publication.name);
         }
 
-        // Small delay to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Small delay to avoid rate limiting (reduced for faster processing)
+        await new Promise(resolve => setTimeout(resolve, 500));
 
       } catch (error: any) {
-        console.error(`Error processing ${domain}:`, error);
+        console.error(`Error processing ${publication.name}:`, error);
         
         if (error.message === 'API_KEY_INVALID' || error.message === 'RATE_LIMIT_EXCEEDED') {
           // Update audit with partial results and credits error
@@ -125,7 +125,7 @@ async function processAuditAsync(auditId: string, brandName: string) {
         
         // Add failed result for this domain
         results.push({
-          domain,
+          domain: publication.domain,
           brandMentioned: false
         });
       }
@@ -141,7 +141,11 @@ async function processAuditAsync(auditId: string, brandName: string) {
 
     // Find top source
     const mentionedResults = results.filter(r => r.brandMentioned);
-    const topSource = mentionedResults.length > 0 ? mentionedResults[0].domain : null;
+    const topSource = mentionedResults.length > 0 ? 
+      NEWS_PUBLICATIONS.find(p => p.domain === mentionedResults[0].domain)?.name || mentionedResults[0].domain : null;
+
+    // Generate shareable link
+    const shareableLink = `${process.env.BASE_URL || 'http://localhost:5000'}/share/${auditId}`;
 
     // Update audit with final results
     await storage.updateAudit(auditId, {
@@ -151,6 +155,7 @@ async function processAuditAsync(auditId: string, brandName: string) {
       mentionsFound,
       coverageRate: Math.round((mentionsFound / NEWS_PUBLICATIONS.length) * 100),
       topSource,
+      shareableLink,
       completedAt: new Date()
     });
 
@@ -164,4 +169,23 @@ async function processAuditAsync(auditId: string, brandName: string) {
       completedAt: new Date()
     });
   }
+
+  // Share route
+  router.get('/share/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const audit = await storage.getAudit(id);
+      
+      if (!audit) {
+        return res.status(404).json({ error: 'Audit not found' });
+      }
+      
+      res.json(audit);
+    } catch (error) {
+      console.error('Error fetching shared audit:', error);
+      res.status(500).json({ error: 'Failed to fetch audit' });
+    }
+  });
+
+  return router;
 }

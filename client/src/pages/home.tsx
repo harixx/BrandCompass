@@ -3,6 +3,7 @@ import AuditForm from "@/components/audit-form";
 import LoadingSection from "@/components/loading-section";
 import ResultsSection from "@/components/results-section";
 import StrategySection from "@/components/strategy-section";
+import PricingSection from "@/components/pricing-section";
 import { Search } from "lucide-react";
 
 export default function Home() {
@@ -57,6 +58,8 @@ export default function Home() {
       {/* Strategy Section */}
       {auditId && <StrategySection auditId={auditId} />}
 
+      {/* Pricing Section */}
+      {auditId && <PricingSection />}
 
     </div>
   );
