@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Globe, TrendingUp, Percent, Award, Check, X, Download, Share2 } from "lucide-react";
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend } from "recharts";
+
 import { useState } from "react";
 import { type Audit, type AuditResult, NEWS_PUBLICATIONS } from "@shared/schema";
 import jsPDF from 'jspdf';
@@ -50,7 +50,7 @@ export default function ResultsSection({ auditId }: ResultsSectionProps) {
       heightLeft -= pageHeight;
     }
     
-    pdf.save(`${audit.brandName}-brand-audit.pdf`);
+    pdf.save(`${audit?.brandName || 'brand'}-brand-audit.pdf`);
   };
 
   const handleShare = () => {
@@ -63,11 +63,11 @@ export default function ResultsSection({ auditId }: ResultsSectionProps) {
     }
   };
 
-  if (!audit || audit.status !== "completed") {
+  if (!audit) {
     return null;
   }
 
-  if (audit?.status === "failed") {
+  if (audit.status === "failed") {
     return (
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 text-center">
@@ -81,19 +81,14 @@ export default function ResultsSection({ auditId }: ResultsSectionProps) {
     );
   }
 
+  if (audit.status !== "completed") {
+    return null;
+  }
+
   const results = (audit.results as AuditResult[]) || [];
   const mentionedResults = results.filter(r => r.brandMentioned);
   
-  // Prepare chart data
-  const pieData = [
-    { name: 'Mentioned', value: audit.mentionsFound || 0, color: '#10B981' },
-    { name: 'Not Mentioned', value: (audit.totalPublications || 0) - (audit.mentionsFound || 0), color: '#F3F4F6' }
-  ];
 
-  const barData = mentionedResults.slice(0, 5).map(result => ({
-    name: result.domain.replace(/^(https?:\/\/)?(www\.)?/, '').split('.')[0],
-    mentions: 1
-  }));
 
   return (
     <section className="py-20 bg-neutral-50">
@@ -151,7 +146,7 @@ export default function ResultsSection({ auditId }: ResultsSectionProps) {
                 <TrendingUp className="w-6 h-6 text-yellow-600" />
               </div>
               <div className="text-sm font-medium text-neutral-600 mb-1">Missed Opportunities</div>
-              <div className="text-3xl font-bold text-neutral-900 mb-1">{audit.totalPublications - audit.mentionsFound}</div>
+              <div className="text-3xl font-bold text-neutral-900 mb-1">{(audit.totalPublications || 0) - (audit.mentionsFound || 0)}</div>
               <div className="text-xs text-neutral-500">Potential placements</div>
             </Card>
             
@@ -165,62 +160,20 @@ export default function ResultsSection({ auditId }: ResultsSectionProps) {
             </Card>
           </div>
 
-          {/* Charts Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            {/* Coverage Overview */}
-            <Card className="bg-white rounded-xl border border-neutral-200 shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold text-neutral-900">Coverage Overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={80}
-                        dataKey="value"
-                        label={({ name, value }) => `${name}: ${value}`}
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
+          {/* Company Overview Report Alert */}
+          <Card className="bg-red-50 border-2 border-red-200 rounded-xl shadow-sm mb-12">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                  <X className="w-6 h-6 text-red-600" />
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Top Mentions */}
-            <Card className="bg-white rounded-xl border border-neutral-200 shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold text-neutral-900">
-                  Top Mentions ({mentionedResults.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {mentionedResults.length > 0 ? (
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={barData}>
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Bar dataKey="mentions" fill="#3B82F6" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <div className="h-64 flex items-center justify-center text-neutral-500">
-                    No mentions found across publications
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                <div>
+                  <h3 className="text-lg font-bold text-red-900 mb-1">Company Overview Report Missing</h3>
+                  <p className="text-red-700">Detailed company overview and strategic recommendations are not included in this free audit. Upgrade to access comprehensive insights.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Detailed Results Table */}
           <Card className="bg-white rounded-xl border border-neutral-200 shadow-sm">

@@ -2,10 +2,24 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Crown } from "lucide-react";
-import { useState } from "react";
 
-export default function PricingSection() {
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'campaign'>('campaign');
+import { useQuery } from "@tanstack/react-query";
+import { type Audit } from "@shared/schema";
+
+interface PricingSectionProps {
+  auditId?: string;
+}
+
+export default function PricingSection({ auditId }: PricingSectionProps) {
+  const { data: audit } = useQuery<Audit>({
+    queryKey: ["/api/audit", auditId],
+    enabled: !!auditId
+  });
+
+  // Only show pricing after audit is completed
+  if (!audit || audit.status !== "completed") {
+    return null;
+  }
 
   return (
     <section className="py-20 bg-white">
@@ -20,31 +34,6 @@ export default function PricingSection() {
           <p className="text-xl text-neutral-600 mb-8">
             Choose a professional PR solution to build credibility and visibility across major media outlets.
           </p>
-          
-          <div className="flex items-center justify-center mb-8">
-            <div className="bg-neutral-100 p-1 rounded-lg flex">
-              <button
-                onClick={() => setBillingCycle('campaign')}
-                className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
-                  billingCycle === 'campaign'
-                    ? 'bg-white text-neutral-900 shadow-sm'
-                    : 'text-neutral-600 hover:text-neutral-900'
-                }`}
-              >
-                Per Campaign
-              </button>
-              <button
-                onClick={() => setBillingCycle('monthly')}
-                className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
-                  billingCycle === 'monthly'
-                    ? 'bg-white text-neutral-900 shadow-sm'
-                    : 'text-neutral-600 hover:text-neutral-900'
-                }`}
-              >
-                Monthly
-              </button>
-            </div>
-          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
@@ -57,10 +46,10 @@ export default function PricingSection() {
                 
                 <div className="mb-6">
                   <span className="text-4xl font-bold text-neutral-900">$999</span>
-                  <span className="text-neutral-600 ml-2">/ campaign</span>
+                  <span className="text-neutral-600 ml-2">/ company</span>
                 </div>
                 
-                <p className="text-sm text-neutral-500 mb-6">Billed monthly • Cancel anytime</p>
+                <p className="text-sm text-neutral-500 mb-6">One-time analysis • Complete audit report</p>
               </div>
 
               <div className="space-y-4 mb-8">
@@ -114,10 +103,10 @@ export default function PricingSection() {
                 
                 <div className="mb-6">
                   <span className="text-4xl font-bold text-neutral-900">$3,500</span>
-                  <span className="text-neutral-600 ml-2">/ campaign</span>
+                  <span className="text-neutral-600 ml-2">/ company</span>
                 </div>
                 
-                <p className="text-sm text-neutral-500 mb-6">Billed monthly • Cancel anytime</p>
+                <p className="text-sm text-neutral-500 mb-6">Comprehensive analysis • Full service package</p>
               </div>
 
               <div className="space-y-4 mb-8">
