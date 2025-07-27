@@ -11,10 +11,9 @@ import { type Audit, type AuditResult } from "@shared/schema";
 
 interface ResultsSectionProps {
   auditId: string;
-  onShowPricing: () => void;
 }
 
-export default function ResultsSection({ auditId, onShowPricing }: ResultsSectionProps) {
+export default function ResultsSection({ auditId }: ResultsSectionProps) {
   const [showCreditsModal, setShowCreditsModal] = useState(false);
   
   const { data: audit } = useQuery<Audit>({
@@ -44,7 +43,7 @@ export default function ResultsSection({ auditId, onShowPricing }: ResultsSectio
               </h2>
               <p className="text-neutral-600 mb-8">
                 {isCreditsIssue 
-                  ? "You've reached your included credits. Please add your own SerpAPI key to continue."
+                  ? "API key issue detected. Please check your Serper.dev API key configuration."
                   : "We encountered an error while processing your audit. Please try again."
                 }
               </p>
@@ -61,14 +60,14 @@ export default function ResultsSection({ auditId, onShowPricing }: ResultsSectio
         <Dialog open={showCreditsModal} onOpenChange={setShowCreditsModal}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Your SerpAPI Key</DialogTitle>
+              <DialogTitle>API Key Configuration</DialogTitle>
               <DialogDescription>
-                You've reached your included credits. Please add your own SerpAPI key to continue processing audits.
+                Please check your Serper.dev API key configuration to continue processing audits.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <p className="text-sm text-neutral-600">
-                Get your API key from <a href="https://serpapi.com" target="_blank" rel="noopener noreferrer" className="text-brand-blue hover:underline">serpapi.com</a>
+                Get your API key from <a href="https://serper.dev" target="_blank" rel="noopener noreferrer" className="text-brand-blue hover:underline">serper.dev</a>
               </p>
               <Button onClick={() => setShowCreditsModal(false)}>
                 Close
@@ -269,15 +268,7 @@ export default function ResultsSection({ auditId, onShowPricing }: ResultsSectio
           </CardContent>
         </Card>
 
-        {/* CTA to Pricing */}
-        <div className="text-center mt-12">
-          <Button
-            onClick={onShowPricing}
-            className="bg-brand-blue text-white hover:bg-blue-600 px-8 py-3 text-lg"
-          >
-            Boost Your PR Presence
-          </Button>
-        </div>
+
       </div>
     </section>
   );

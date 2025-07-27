@@ -40,13 +40,18 @@ export class MemStorage implements IStorage {
   async createAudit(insertAudit: InsertAudit): Promise<Audit> {
     const id = randomUUID();
     const audit: Audit = { 
-      ...insertAudit, 
-      id, 
-      createdAt: new Date(),
-      completedAt: null,
+      id,
+      brandName: insertAudit.brandName,
+      websiteUrl: insertAudit.websiteUrl,
+      status: insertAudit.status || "pending",
       results: insertAudit.results || null,
       strategy: insertAudit.strategy || null,
-      status: insertAudit.status || "pending"
+      totalPublications: insertAudit.totalPublications || null,
+      mentionsFound: insertAudit.mentionsFound || null,
+      coverageRate: insertAudit.coverageRate || null,
+      topSource: insertAudit.topSource || null,
+      createdAt: new Date(),
+      completedAt: null
     };
     this.audits.set(id, audit);
     return audit;

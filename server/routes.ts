@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { serpApiService } from "./services/serpapi";
+import { serperService } from "./services/serpapi";
 import { openaiService } from "./services/openai";
 import { auditForm, type AuditResult, type AuditStrategy } from "@shared/schema";
 import { NEWS_PUBLICATIONS } from "@shared/schema";
@@ -58,10 +58,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Check SerpAPI credits
+  // Check Serper API credits
   app.get("/api/credits", async (req, res) => {
     try {
-      const credits = await serpApiService.checkCredits();
+      const credits = await serperService.checkCredits();
       res.json(credits);
     } catch (error: any) {
       console.error('Credits check error:', error);
@@ -86,7 +86,7 @@ async function processAuditAsync(auditId: string, brandName: string) {
       try {
         console.log(`Searching ${domain} for "${brandName}"`);
         
-        const searchResults = await serpApiService.searchDomain(domain, brandName);
+        const searchResults = await serperService.searchDomain(domain, brandName);
         const classification = await openaiService.classifyMention(brandName, searchResults);
         
         const result: AuditResult = {
@@ -111,7 +111,7 @@ async function processAuditAsync(auditId: string, brandName: string) {
       } catch (error: any) {
         console.error(`Error processing ${domain}:`, error);
         
-        if (error.message === 'CREDITS_EXHAUSTED') {
+        if (error.message === 'API_KEY_INVALID' || error.message === 'RATE_LIMIT_EXCEEDED') {
           // Update audit with partial results and credits error
           await storage.updateAudit(auditId, {
             status: "failed",

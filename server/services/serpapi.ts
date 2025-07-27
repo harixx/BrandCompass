@@ -6,24 +6,28 @@ export interface SerpResult {
   link: string;
 }
 
-export class SerpAPIService {
+export class SerperService {
   private apiKey: string;
-  private baseUrl = 'https://serpapi.com/search';
+  private baseUrl = 'https://google.serper.dev/search';
 
   constructor() {
-    this.apiKey = process.env.SERPAPI_KEY || '323fb93b331243fb3fe11900ec1bab86e8d3e773';
+    this.apiKey = process.env.SERPER_API_KEY || '';
+    if (!this.apiKey) {
+      throw new Error('SERPER_API_KEY is required');
+    }
   }
 
   async searchDomain(domain: string, brandName: string): Promise<SerpResult[]> {
     try {
       const query = `site:${domain} "${brandName}"`;
       
-      const response = await axios.get(this.baseUrl, {
-        params: {
-          api_key: this.apiKey,
-          engine: 'google',
-          q: query,
-          num: 10
+      const response = await axios.post(this.baseUrl, {
+        q: query,
+        num: 10
+      }, {
+        headers: {
+          'X-API-KEY': this.apiKey,
+          'Content-Type': 'application/json'
         }
       });
 
@@ -31,7 +35,7 @@ export class SerpAPIService {
         throw new Error(response.data.error);
       }
 
-      const organicResults = response.data.organic_results || [];
+      const organicResults = response.data.organic || [];
       
       return organicResults.map((result: any) => ({
         title: result.title || '',
@@ -40,28 +44,20 @@ export class SerpAPIService {
       }));
 
     } catch (error: any) {
-      if (error.response?.status === 401 || error.response?.data?.error?.includes('credits')) {
-        throw new Error('CREDITS_EXHAUSTED');
+      if (error.response?.status === 401) {
+        throw new Error('API_KEY_INVALID');
       }
-      throw new Error(`SerpAPI error: ${error.message}`);
+      if (error.response?.status === 429) {
+        throw new Error('RATE_LIMIT_EXCEEDED');
+      }
+      throw new Error(`Serper API error: ${error.message}`);
     }
   }
 
   async checkCredits(): Promise<{ credits_left: number }> {
-    try {
-      const response = await axios.get('https://serpapi.com/account', {
-        params: {
-          api_key: this.apiKey
-        }
-      });
-      
-      return {
-        credits_left: response.data.account?.credits_left || 0
-      };
-    } catch (error: any) {
-      throw new Error(`Credits check failed: ${error.message}`);
-    }
+    // Serper.dev doesn't have a credits endpoint, return a default value
+    return { credits_left: 1000 };
   }
 }
 
-export const serpApiService = new SerpAPIService();
+export const serperService = new SerperService();

@@ -2,7 +2,7 @@
 
 ## Overview
 
-BrandScope is a modern SaaS-style web application that analyzes a brand's digital media presence across 30+ predefined news publications. The application allows users to input their brand name and website URL, then runs automated searches across major news outlets to determine mention coverage and provides AI-powered strategic recommendations.
+BrandScope is a free digital media analysis tool that examines a brand's presence across 30+ major news publications. Users input their brand name and website URL to run automated searches using the site:domain "brand name" query format. The tool provides comprehensive coverage analysis, detailed results visualization, and AI-powered strategic recommendations for improving media presence.
 
 ## User Preferences
 
@@ -40,26 +40,26 @@ The application uses a simple schema with two main entities:
 5. **Strategy Generation**: AI-powered recommendations based on audit results
 
 ### External Service Integrations
-- **SerpAPI**: Search engine results for domain-specific brand searches
-- **OpenAI API**: GPT-4 for content analysis and strategy recommendations
-- **Credit Management**: Built-in handling for API credit exhaustion
+- **Serper.dev API**: Google search results using site:domain "brand name" queries
+- **OpenAI API**: GPT-4o for content analysis and strategy recommendations
+- **Error Handling**: Built-in handling for API key issues and rate limiting
 
 ### User Interface Components
 - **Audit Form**: Clean input interface with real-time validation
 - **Loading States**: Animated progress indicators during processing
 - **Results Dashboard**: Comprehensive data visualization with charts and tables
-- **Strategy Section**: AI-generated insights and recommendations
-- **Pricing Section**: SaaS pricing tiers with upgrade prompts
+- **Strategy Section**: AI-generated insights and recommendations (displayed after audit completion)
+- **Tool-focused Design**: Simplified interface without SaaS elements like sign-in or pricing
 
 ## Data Flow
 
 1. User submits brand information through the audit form
 2. Backend creates audit record and initiates asynchronous processing
-3. System searches each publication domain using SerpAPI with brand-specific queries
-4. Search results are analyzed by OpenAI for genuine brand mentions
+3. System searches each publication domain using Serper.dev with site:domain "brand name" queries
+4. Search results are analyzed by OpenAI GPT-4o for genuine brand mentions
 5. Results are aggregated and stored with completion metrics
 6. Frontend polls for updates and displays real-time progress
-7. Upon completion, comprehensive report and strategy recommendations are presented
+7. Upon completion, comprehensive report is displayed followed by AI-generated strategy recommendations
 
 ## External Dependencies
 
@@ -71,8 +71,8 @@ The application uses a simple schema with two main entities:
 - **shadcn/ui**: Comprehensive UI component library
 
 ### API Services
-- **SerpAPI**: Search result aggregation (with credit monitoring)
-- **OpenAI API**: Content analysis and strategy generation
+- **Serper.dev**: Google search result aggregation with site-specific queries
+- **OpenAI API**: GPT-4o for content analysis and strategy generation
 - **Recharts**: Data visualization for audit results
 
 ### Development Tools
@@ -102,6 +102,16 @@ The application uses a simple schema with two main entities:
 
 **UI Framework**: shadcn/ui with Radix UI primitives offers accessibility and customization while maintaining design consistency.
 
-**API Integration**: Separate service classes for external APIs (SerpAPI, OpenAI) provide clean abstraction and error handling.
+**API Integration**: Separate service classes for external APIs (Serper.dev, OpenAI) provide clean abstraction and error handling.
 
 **Async Processing**: Audit processing runs asynchronously with polling-based status updates to provide responsive user experience during long-running operations.
+
+**Tool Design**: Simplified as a free analysis tool rather than SaaS platform, removing pricing tiers, sign-in functionality, and footer elements for focused user experience.
+
+## Recent Changes (January 2025)
+
+- **API Migration**: Switched from SerpAPI to Serper.dev for search functionality using site:domain "brand name" query format
+- **UI Simplification**: Removed SaaS elements (pricing section, sign-in, footer) to focus on tool functionality
+- **Workflow Update**: Strategy recommendations now display after audit completion as requested
+- **Error Handling**: Updated error messages and handling for Serper.dev API integration
+- **Type Safety**: Fixed storage type issues for better development experience
