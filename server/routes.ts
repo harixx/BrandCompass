@@ -71,6 +71,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Share route
+  app.get('/api/share/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const audit = await storage.getAudit(id);
+      
+      if (!audit) {
+        return res.status(404).json({ error: 'Audit not found' });
+      }
+      
+      res.json(audit);
+    } catch (error) {
+      console.error('Error fetching shared audit:', error);
+      res.status(500).json({ error: 'Failed to fetch audit' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
@@ -169,23 +186,4 @@ async function processAuditAsync(auditId: string, brandName: string) {
       completedAt: new Date()
     });
   }
-
-  // Share route
-  router.get('/share/:id', async (req, res) => {
-    try {
-      const { id } = req.params;
-      const audit = await storage.getAudit(id);
-      
-      if (!audit) {
-        return res.status(404).json({ error: 'Audit not found' });
-      }
-      
-      res.json(audit);
-    } catch (error) {
-      console.error('Error fetching shared audit:', error);
-      res.status(500).json({ error: 'Failed to fetch audit' });
-    }
-  });
-
-  return router;
 }
