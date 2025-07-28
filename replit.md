@@ -110,6 +110,11 @@ The application uses a simple schema with two main entities:
 
 ## Recent Changes (January 2025)
 
+- **Migration Complete**: Successfully migrated from Replit Agent to standard Replit environment
+- **Service Integration**: Created missing OpenAI service module with proper type compatibility
+- **API Configuration**: Set up required environment variables (SERPER_API_KEY, OPENAI_API_KEY)
+- **Enhanced Visualization**: Added interactive pie chart showing coverage analysis with Publications Checked (30), Mentions Found, Missed Opportunities, and Coverage Score vs Industry benchmark (25%)
+- **UI Improvement**: Replaced "Company Overview Report Missing" section with comprehensive Coverage Analysis chart
 - **API Migration**: Switched from SerpAPI to Serper.dev for search functionality using site:domain "brand name" query format
 - **UI Simplification**: Removed SaaS elements (pricing section, sign-in, footer) to focus on tool functionality
 - **Workflow Update**: Strategy recommendations now display after audit completion as requested

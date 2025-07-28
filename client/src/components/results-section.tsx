@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Globe, TrendingUp, Percent, Award, Check, X, Download, Share2 } from "lucide-react";
+import { Globe, TrendingUp, Percent, Award, Check, X, Download, Share2, BarChart3 } from "lucide-react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 import { useState } from "react";
 import { type Audit, type AuditResult, NEWS_PUBLICATIONS } from "@shared/schema";
@@ -160,16 +161,100 @@ export default function ResultsSection({ auditId }: ResultsSectionProps) {
             </Card>
           </div>
 
-          {/* Company Overview Report Alert */}
-          <Card className="bg-red-50 border-2 border-red-200 rounded-xl shadow-sm mb-12">
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
-                  <X className="w-6 h-6 text-red-600" />
+          {/* Coverage Analysis Pie Chart */}
+          <Card className="bg-white rounded-xl border border-neutral-200 shadow-sm mb-12">
+            <CardHeader>
+              <div className="flex items-center justify-center">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                  <BarChart3 className="w-6 h-6 text-brand-blue" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-red-900 mb-1">Company Overview Report Missing</h3>
-                  <p className="text-red-700">Detailed company overview and strategic recommendations are not included in this free audit. Upgrade to access comprehensive insights.</p>
+                  <CardTitle className="text-xl font-bold text-neutral-900">Coverage Analysis</CardTitle>
+                  <p className="text-neutral-600">Visual breakdown of your brand's media presence</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                {/* Pie Chart */}
+                <div className="lg:col-span-2">
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { 
+                              name: 'Mentions Found', 
+                              value: audit.mentionsFound || 0, 
+                              color: '#10B981',
+                              description: 'Publications featuring your brand'
+                            },
+                            { 
+                              name: 'Missed Opportunities', 
+                              value: (audit.totalPublications || 0) - (audit.mentionsFound || 0), 
+                              color: '#F59E0B',
+                              description: 'Publications without brand mentions'
+                            }
+                          ]}
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={120}
+                          innerRadius={60}
+                          paddingAngle={2}
+                          dataKey="value"
+                        >
+                          {[
+                            { color: '#10B981' },
+                            { color: '#F59E0B' }
+                          ].map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(value: number, name: string) => [
+                            `${value} publications`,
+                            name
+                          ]}
+                          contentStyle={{
+                            backgroundColor: '#fff',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                          }}
+                        />
+                        <Legend 
+                          verticalAlign="bottom" 
+                          height={36}
+                          formatter={(value: string) => (
+                            <span className="text-sm font-medium text-neutral-700">{value}</span>
+                          )}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Statistics */}
+                <div className="space-y-6">
+                  <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-2xl font-bold text-green-800 mb-1">{audit.mentionsFound || 0}</div>
+                    <div className="text-sm font-medium text-green-700 mb-1">Mentions Found</div>
+                    <div className="text-xs text-green-600">{audit.coverageRate}% coverage</div>
+                  </div>
+
+                  <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <div className="text-2xl font-bold text-yellow-800 mb-1">
+                      {(audit.totalPublications || 0) - (audit.mentionsFound || 0)}
+                    </div>
+                    <div className="text-sm font-medium text-yellow-700 mb-1">Missed Opportunities</div>
+                    <div className="text-xs text-yellow-600">Potential placements</div>
+                  </div>
+
+                  <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="text-2xl font-bold text-blue-800 mb-1">{audit.coverageRate}%</div>
+                    <div className="text-sm font-medium text-blue-700 mb-1">Coverage Score</div>
+                    <div className="text-xs text-blue-600">Industry benchmark: 25%</div>
+                  </div>
                 </div>
               </div>
             </CardContent>
