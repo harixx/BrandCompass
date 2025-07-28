@@ -1,0 +1,70 @@
+my http logs :
+
+requestId:"u9l-tgOvSG-VGwT3DcO5xA"
+timestamp:"2025-07-28T08:36:29.982595156Z"
+method:"GET"
+path:"/"
+host:"brandcompass.up.railway.app"
+httpStatus:502
+upstreamProto:""
+downstreamProto:"HTTP/2.0"
+responseDetails:"Retried single replica"
+totalDuration:871
+upstreamAddress:""
+clientUa:"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+upstreamRqDuration:714
+txBytes:4682
+rxBytes:767
+srcIp:"206.42.124.221"
+edgeRegion:"asia-southeast1-eqsg3a"
+requestId:"d-T1-FSETquiwr5NDcO5xA"
+timestamp:"2025-07-28T08:36:30.862220141Z"
+method:"GET"
+path:"/favicon.ico"
+host:"brandcompass.up.railway.app"
+httpStatus:502
+upstreamProto:""
+downstreamProto:"HTTP/2.0"
+responseDetails:"Retried single replica"
+totalDuration:715
+upstreamAddress:""
+clientUa:"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+upstreamRqDuration:714
+txBytes:109
+rxBytes:701
+srcIp:"206.42.124.221"
+edgeRegion:"asia-southeast1-eqsg3a"
+requestId:"PyKdWyYLR1uIYvOHDcO5xA"
+timestamp:"2025-07-28T08:37:13.215811274Z"
+method:"GET"
+path:"/favicon.ico"
+host:"brandcompass.up.railway.app"
+httpStatus:502
+upstreamProto:""
+downstreamProto:"HTTP/2.0"
+responseDetails:"Retried single replica"
+totalDuration:721
+upstreamAddress:""
+clientUa:"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+upstreamRqDuration:719
+txBytes:4682
+rxBytes:772
+srcIp:"206.42.124.221"
+edgeRegion:"asia-southeast1-eqsg3a"
+requestId:"Cih-22R4SeKTJ1tvDcO5xA"
+timestamp:"2025-07-28T08:37:14.119782031Z"
+method:"GET"
+path:"/favicon.ico"
+host:"brandcompass.up.railway.app"
+httpStatus:502
+upstreamProto:""
+downstreamProto:"HTTP/2.0"
+responseDetails:"Retried single replica"
+totalDuration:716
+upstreamAddress:""
+clientUa:"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
+upstreamRqDuration:714
+txBytes:109
+rxBytes:712
+srcIp:"206.42.124.221"
+edgeRegion:"asia-southeast1-eqsg3a"

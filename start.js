@@ -17,7 +17,13 @@ if (missingVars.length > 0) {
 console.log('✅ Environment variables configured');
 
 // Import and start the main application
-import('./dist/index.js').catch(err => {
-  console.error('❌ Failed to start application:', err);
-  process.exit(1);
-});
+(async () => {
+  try {
+    await import('./dist/index.js');
+    console.log('✅ Application started successfully');
+  } catch (err) {
+    console.error('❌ Failed to start application:', err);
+    console.error(err.stack);
+    process.exit(1);
+  }
+})();
