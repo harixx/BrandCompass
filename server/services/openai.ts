@@ -7,6 +7,7 @@ export class OpenAIService {
   constructor() {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
+      console.error('OPENAI_API_KEY is missing from environment variables');
       throw new Error('OPENAI_API_KEY is required');
     }
     
@@ -310,4 +311,9 @@ Return a JSON object in this exact format:
   }
 }
 
-export const openaiService = new OpenAIService();
+// Export as function to avoid top-level instantiation issues
+export function getOpenAIService(): OpenAIService {
+  return new OpenAIService();
+}
+
+export const openaiService = getOpenAIService();

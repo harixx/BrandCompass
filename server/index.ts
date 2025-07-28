@@ -37,14 +37,20 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
+  try {
+    console.log(`Starting server in ${process.env.NODE_ENV || 'development'} mode...`);
+    const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
+    console.error('Express error handler:', err);
     res.status(status).json({ message });
-    throw err;
+    // Don't throw the error in production as it crashes the server
+    if (process.env.NODE_ENV !== 'production') {
+      throw err;
+    }
   });
 
   // importantly only setup vite in development and after
@@ -63,7 +69,24 @@ app.use((req, res, next) => {
   const port = parseInt(process.env.PORT || '5000', 10);
   
   // Railway and most cloud platforms require binding to 0.0.0.0
-  server.listen(port, "0.0.0.0", () => {
-    log(`serving on port ${port}`);
-  });
+    server.listen(port, "0.0.0.0", () => {
+      log(`Server started successfully on port ${port}`);
+      log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      log(`Static files served from: ${process.env.NODE_ENV === 'production' ? 'dist/public' : 'client'}`);
+    });
+  } catch (error) {
+    console.error('Fatal server startup error:', error);
+    process.exit(1);
+  }
 })();
+
+// Handle uncaught exceptions and rejections
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});

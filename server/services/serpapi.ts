@@ -13,6 +13,7 @@ export class SerperService {
   constructor() {
     this.apiKey = process.env.SERPER_API_KEY || '';
     if (!this.apiKey) {
+      console.error('SERPER_API_KEY is missing from environment variables');
       throw new Error('SERPER_API_KEY is required');
     }
   }
@@ -114,4 +115,9 @@ export class SerperService {
   }
 }
 
-export const serperService = new SerperService();
+// Export as function to avoid top-level instantiation issues
+export function getSerperService(): SerperService {
+  return new SerperService();
+}
+
+export const serperService = getSerperService();
