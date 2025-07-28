@@ -22,11 +22,11 @@ export default function ResultsSection({ auditId }: ResultsSectionProps) {
   
   const { data: audit } = useQuery<Audit>({
     queryKey: ["/api/audit", auditId],
-    refetchInterval: (data) => {
+    refetchInterval: (query) => {
       // Smart polling: faster when processing, slower when completed
-      if (!data) return 1000;
-      if (data.status === "processing") return 3000; // Reduced from 2000ms
-      if (data.status === "completed" || data.status === "failed") return false; // Stop polling
+      if (!query.state.data) return 1000;
+      if (query.state.data.status === "processing") return 3000; // Reduced from 2000ms
+      if (query.state.data.status === "completed" || query.state.data.status === "failed") return false; // Stop polling
       return 5000; // Default slower polling
     },
     enabled: !!auditId,
@@ -102,7 +102,7 @@ export default function ResultsSection({ auditId }: ResultsSectionProps) {
     <section className="py-20 bg-neutral-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-brand-blue rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-brand-blue rounded-2xl flex items-center justify-center mx-auto mb-4 hover:scale-110 hover:shadow-lg transition-all duration-300 ease-in-out cursor-default">
             <TrendingUp className="w-8 h-8 text-white" />
           </div>
           <h2 className="text-4xl font-bold text-neutral-900 mb-4">Your Brand Audit Results</h2>
@@ -131,8 +131,8 @@ export default function ResultsSection({ auditId }: ResultsSectionProps) {
         <div id="audit-results">
           {/* Metrics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-            <Card className="bg-white rounded-xl border border-neutral-200 shadow-sm text-center p-6">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Card className="bg-white rounded-xl border border-neutral-200 shadow-sm text-center p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 ease-in-out group">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-blue-200 transition-all duration-200">
                 <Globe className="w-6 h-6 text-brand-blue" />
               </div>
               <div className="text-sm font-medium text-neutral-600 mb-1">Publications Checked</div>
@@ -140,8 +140,8 @@ export default function ResultsSection({ auditId }: ResultsSectionProps) {
               <div className="text-xs text-neutral-500">Major news outlets</div>
             </Card>
             
-            <Card className="bg-white rounded-xl border border-neutral-200 shadow-sm text-center p-6">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Card className="bg-white rounded-xl border border-neutral-200 shadow-sm text-center p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 ease-in-out group">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-green-200 transition-all duration-200">
                 <Check className="w-6 h-6 text-brand-green" />
               </div>
               <div className="text-sm font-medium text-neutral-600 mb-1">Mentions Found</div>
@@ -149,8 +149,8 @@ export default function ResultsSection({ auditId }: ResultsSectionProps) {
               <div className="text-xs text-neutral-500">{audit.coverageRate}% coverage</div>
             </Card>
             
-            <Card className="bg-white rounded-xl border border-neutral-200 shadow-sm text-center p-6">
-              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Card className="bg-white rounded-xl border border-neutral-200 shadow-sm text-center p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 ease-in-out group">
+              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-yellow-200 transition-all duration-200">
                 <TrendingUp className="w-6 h-6 text-yellow-600" />
               </div>
               <div className="text-sm font-medium text-neutral-600 mb-1">Missed Opportunities</div>
@@ -158,8 +158,8 @@ export default function ResultsSection({ auditId }: ResultsSectionProps) {
               <div className="text-xs text-neutral-500">Potential placements</div>
             </Card>
             
-            <Card className="bg-white rounded-xl border border-neutral-200 shadow-sm text-center p-6">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Card className="bg-white rounded-xl border border-neutral-200 shadow-sm text-center p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 ease-in-out group">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-red-200 transition-all duration-200">
                 <Percent className="w-6 h-6 text-red-600" />
               </div>
               <div className="text-sm font-medium text-neutral-600 mb-1">Coverage Score</div>
@@ -169,7 +169,7 @@ export default function ResultsSection({ auditId }: ResultsSectionProps) {
           </div>
 
           {/* Coverage Analysis Pie Chart */}
-          <Card className="bg-white rounded-xl border border-neutral-200 shadow-sm mb-12">
+          <Card className="bg-white rounded-xl border border-neutral-200 shadow-sm mb-12 hover:shadow-lg transition-all duration-300 ease-in-out">
             <CardHeader>
               <div className="flex items-center justify-center">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">

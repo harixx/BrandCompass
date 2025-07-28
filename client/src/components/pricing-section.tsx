@@ -38,7 +38,7 @@ export default function PricingSection({ auditId }: PricingSectionProps) {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {/* PR Starter */}
-          <Card className="bg-white rounded-2xl border border-neutral-200 shadow-lg">
+          <Card className="bg-white rounded-2xl border border-neutral-200 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 ease-in-out group">
             <CardContent className="p-8">
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-neutral-900 mb-2">PR Starter</h3>
@@ -53,8 +53,8 @@ export default function PricingSection({ auditId }: PricingSectionProps) {
               </div>
 
               <div className="space-y-4 mb-8">
-                <div className="flex items-start">
-                  <Check className="w-5 h-5 text-brand-green mt-0.5 mr-3 flex-shrink-0" />
+                <div className="flex items-start hover:text-brand-blue transition-colors duration-200">
+                  <Check className="w-5 h-5 text-brand-green mt-0.5 mr-3 flex-shrink-0 hover:scale-110 transition-transform duration-200" />
                   <span className="text-neutral-700">1 Press Release Syndication</span>
                 </div>
                 <div className="flex items-start">
@@ -90,7 +90,7 @@ export default function PricingSection({ auditId }: PricingSectionProps) {
           </Card>
 
           {/* All-in-One PR */}
-          <Card className="bg-white rounded-2xl border-2 border-brand-blue shadow-xl relative">
+          <Card className="bg-white rounded-2xl border-2 border-brand-blue shadow-xl relative hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 ease-in-out group">
             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
               <Badge className="bg-brand-blue text-white px-4 py-1 text-sm font-medium">
                 ⭐ Most Popular

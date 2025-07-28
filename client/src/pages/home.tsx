@@ -15,14 +15,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-neutral-50">
       {/* Navigation */}
-      <nav className="bg-white border-b border-neutral-100 sticky top-0 z-50">
+      <nav className="bg-white border-b border-neutral-100 sticky top-0 z-50 transition-all duration-300 ease-in-out hover:shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-brand-blue rounded-lg flex items-center justify-center">
+            <div className="flex items-center space-x-3 cursor-pointer group">
+              <div className="w-8 h-8 bg-brand-blue rounded-lg flex items-center justify-center transition-all duration-200 ease-in-out group-hover:scale-110 group-hover:shadow-lg">
                 <Search className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-neutral-900">BrandScope</span>
+              <span className="text-xl font-bold text-neutral-900 transition-colors duration-200 group-hover:text-brand-blue">BrandScope</span>
             </div>
             <div className="text-sm text-neutral-600">
               Free Brand PR Analysis Tool

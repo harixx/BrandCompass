@@ -71,6 +71,7 @@ var SerperService = class {
   constructor() {
     this.apiKey = process.env.SERPER_API_KEY || "";
     if (!this.apiKey) {
+      console.error("SERPER_API_KEY is missing from environment variables");
       throw new Error("SERPER_API_KEY is required");
     }
   }
@@ -169,6 +170,7 @@ var OpenAIService = class {
   constructor() {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
+      console.error("OPENAI_API_KEY is missing from environment variables");
       throw new Error("OPENAI_API_KEY is required");
     }
     this.client = new OpenAI({

@@ -100,16 +100,16 @@ export default function AuditForm({ onAuditStart }: AuditFormProps) {
         </form>
         
         <div className="mt-6 flex items-center justify-center space-x-4 text-sm text-neutral-500">
-          <div className="flex items-center space-x-1">
-            <Shield className="w-4 h-4" />
+          <div className="flex items-center space-x-1 hover:text-brand-blue transition-colors duration-200 cursor-default">
+            <Shield className="w-4 h-4 hover:scale-110 transition-transform duration-200" />
             <span>Secure</span>
           </div>
-          <div className="flex items-center space-x-1">
-            <Zap className="w-4 h-4" />
+          <div className="flex items-center space-x-1 hover:text-brand-blue transition-colors duration-200 cursor-default">
+            <Zap className="w-4 h-4 hover:scale-110 transition-transform duration-200" />
             <span>Fast Results</span>
           </div>
-          <div className="flex items-center space-x-1">
-            <Check className="w-4 h-4" />
+          <div className="flex items-center space-x-1 hover:text-brand-blue transition-colors duration-200 cursor-default">
+            <Check className="w-4 h-4 hover:scale-110 transition-transform duration-200" />
             <span>30+ Sources</span>
           </div>
         </div>

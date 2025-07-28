@@ -11,10 +11,10 @@ interface LoadingSectionProps {
 export default function LoadingSection({ auditId }: LoadingSectionProps) {
   const { data: audit } = useQuery<Audit>({
     queryKey: ["/api/audit", auditId],
-    refetchInterval: (data) => {
-      if (!data) return 1000;
-      if (data.status === "processing") return 2000;
-      if (data.status === "completed" || data.status === "failed") return false;
+    refetchInterval: (query) => {
+      if (!query.state.data) return 1000;
+      if (query.state.data.status === "processing") return 2000;
+      if (query.state.data.status === "completed" || query.state.data.status === "failed") return false;
       return 3000;
     },
     enabled: !!auditId
@@ -54,29 +54,29 @@ export default function LoadingSection({ auditId }: LoadingSectionProps) {
             </div>
             
             <div className="space-y-4 max-w-lg mx-auto">
-              <div className="flex items-center p-4 bg-blue-50 rounded-xl border border-blue-100">
-                <div className="w-10 h-10 bg-brand-blue rounded-full flex items-center justify-center mr-4">
+              <div className="flex items-center p-4 bg-blue-50 rounded-xl border border-blue-100 hover:bg-blue-100 hover:shadow-md transition-all duration-300 ease-in-out">
+                <div className="w-10 h-10 bg-brand-blue rounded-full flex items-center justify-center mr-4 hover:scale-110 transition-transform duration-200">
                   <Search className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-brand-blue font-medium flex-1 text-left">Scanning 30+ major news outlets</span>
               </div>
               
-              <div className="flex items-center p-4 bg-neutral-50 rounded-xl">
-                <div className="w-10 h-10 bg-neutral-300 rounded-full flex items-center justify-center mr-4">
+              <div className="flex items-center p-4 bg-neutral-50 rounded-xl hover:bg-neutral-100 hover:shadow-md transition-all duration-300 ease-in-out">
+                <div className="w-10 h-10 bg-neutral-300 rounded-full flex items-center justify-center mr-4 hover:scale-110 hover:bg-neutral-400 transition-all duration-200">
                   <Globe className="w-5 h-5 text-neutral-600" />
                 </div>
                 <span className="text-neutral-600 flex-1 text-left">Analyzing brand mentions with AI</span>
               </div>
               
-              <div className="flex items-center p-4 bg-neutral-50 rounded-xl">
-                <div className="w-10 h-10 bg-neutral-300 rounded-full flex items-center justify-center mr-4">
+              <div className="flex items-center p-4 bg-neutral-50 rounded-xl hover:bg-neutral-100 hover:shadow-md transition-all duration-300 ease-in-out">
+                <div className="w-10 h-10 bg-neutral-300 rounded-full flex items-center justify-center mr-4 hover:scale-110 hover:bg-neutral-400 transition-all duration-200">
                   <Zap className="w-5 h-5 text-neutral-600" />
                 </div>
                 <span className="text-neutral-600 flex-1 text-left">Processing coverage insights</span>
               </div>
               
-              <div className="flex items-center p-4 bg-neutral-50 rounded-xl">
-                <div className="w-10 h-10 bg-neutral-300 rounded-full flex items-center justify-center mr-4">
+              <div className="flex items-center p-4 bg-neutral-50 rounded-xl hover:bg-neutral-100 hover:shadow-md transition-all duration-300 ease-in-out">
+                <div className="w-10 h-10 bg-neutral-300 rounded-full flex items-center justify-center mr-4 hover:scale-110 hover:bg-neutral-400 transition-all duration-200">
                   <CheckCircle className="w-5 h-5 text-neutral-600" />
                 </div>
                 <span className="text-neutral-600 flex-1 text-left">Generating strategic report</span>
