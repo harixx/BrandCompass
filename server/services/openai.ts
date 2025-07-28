@@ -17,57 +17,123 @@ export class OpenAIService {
 
   async analyzeSearchResults(results: any[], brandName: string, domain: string): Promise<{ genuineMentions: AuditResult[] }> {
     try {
-      const prompt = `Analyze these search results for genuine mentions of the brand "${brandName}" on ${domain}. 
-      
-Consider a mention "genuine" if:
-- The brand name appears meaningfully in the title or content
-- It's not just a generic keyword or unrelated mention
-- The content is actually about or relates to the brand
+      // Enhanced validation of input data
+      if (!results || results.length === 0) {
+        console.log(`No search results to analyze for ${brandName} on ${domain}`);
+        return { genuineMentions: [] };
+      }
 
-Return a JSON object with "genuineMentions" array containing only the genuine mentions in this format:
+      // Clean and prepare search results for analysis
+      const cleanResults = results.slice(0, 10).map(result => ({
+        title: result.title || '',
+        snippet: result.snippet || '',
+        link: result.link || ''
+      })).filter(result => result.title || result.snippet);
+
+      if (cleanResults.length === 0) {
+        console.log(`No valid search results to analyze for ${brandName} on ${domain}`);
+        return { genuineMentions: [] };
+      }
+
+      const prompt = `You are an expert brand analyst. Analyze these search results to determine if "${brandName}" is genuinely mentioned.
+
+BRAND TO SEARCH FOR: "${brandName}"
+PUBLICATION DOMAIN: ${domain}
+
+SEARCH RESULTS:
+${cleanResults.map((result, i) => `
+Result ${i + 1}:
+Title: ${result.title}
+Snippet: ${result.snippet}
+URL: ${result.link}
+`).join('\n')}
+
+ANALYSIS CRITERIA:
+A mention is GENUINE if:
+1. The exact brand name "${brandName}" appears in the title or snippet
+2. The content discusses, references, or relates to this specific brand/company
+3. It's not just a generic keyword match or unrelated mention
+4. The article is actually ABOUT the brand or mentions it meaningfully
+
+Be STRICT in your analysis. Only mark as genuine if you're confident the brand is meaningfully mentioned.
+
+Return ONLY a JSON object in this exact format (no additional text):
 {
   "genuineMentions": [
     {
       "domain": "${domain}",
       "brandMentioned": true,
-      "title": "article title",
-      "snippet": "relevant snippet", 
-      "url": "article url"
+      "title": "exact article title here",
+      "snippet": "relevant snippet text here",
+      "url": "full article URL here"
     }
   ]
 }
 
-Search results to analyze:
-${JSON.stringify(results, null, 2)}`;
+If no genuine mentions are found, return: {"genuineMentions": []}`;
 
       const response = await this.client.chat.completions.create({
         model: 'gpt-4o',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.3,
+        messages: [{ 
+          role: 'system', 
+          content: 'You are a precise brand analysis AI. Respond only with valid JSON. Be strict about genuine brand mentions.' 
+        }, {
+          role: 'user', 
+          content: prompt 
+        }],
+        temperature: 0.1, // Very low temperature for consistency
+        max_tokens: 1000,
       });
 
-      const content = response.choices[0]?.message?.content;
+      const content = response.choices[0]?.message?.content?.trim();
       if (!content) {
-        throw new Error('No response from OpenAI');
+        console.error(`No response from OpenAI for ${brandName} on ${domain}`);
+        return { genuineMentions: [] };
       }
 
       try {
-        const parsed = JSON.parse(content);
-        return parsed;
+        // Clean the response (remove any markdown formatting)
+        const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const parsed = JSON.parse(cleanContent);
+        
+        // Validate the response structure
+        if (!parsed.genuineMentions || !Array.isArray(parsed.genuineMentions)) {
+          console.error(`Invalid response structure from OpenAI for ${brandName} on ${domain}:`, parsed);
+          return { genuineMentions: [] };
+        }
+
+        // Validate each mention
+        const validMentions = parsed.genuineMentions.filter((mention: any) => {
+          return mention.domain && mention.title && mention.url;
+        });
+
+        console.log(`OpenAI analysis for ${brandName} on ${domain}: ${validMentions.length} genuine mentions found`);
+        return { genuineMentions: validMentions };
+
       } catch (parseError) {
-        console.error('Failed to parse OpenAI response:', content);
+        console.error(`Failed to parse OpenAI response for ${brandName} on ${domain}:`, content);
+        console.error('Parse error:', parseError);
         return { genuineMentions: [] };
       }
 
     } catch (error: any) {
-      console.error('OpenAI analysis error:', error);
-      if (error.code === 'insufficient_quota') {
+      console.error(`OpenAI analysis error for ${brandName} on ${domain}:`, error);
+      
+      // Handle specific OpenAI errors
+      if (error.code === 'insufficient_quota' || error.message?.includes('quota')) {
         throw new Error('OPENAI_QUOTA_EXCEEDED');
       }
-      if (error.code === 'invalid_api_key') {
+      if (error.code === 'invalid_api_key' || error.message?.includes('api_key')) {
         throw new Error('OPENAI_API_KEY_INVALID');
       }
-      throw new Error(`OpenAI API error: ${error.message}`);
+      if (error.code === 'rate_limit_exceeded' || error.message?.includes('rate limit')) {
+        console.log(`Rate limit hit for ${brandName} on ${domain}, continuing without AI analysis`);
+        return { genuineMentions: [] };
+      }
+      
+      // For other errors, return empty result but continue processing
+      console.log(`Continuing without AI analysis for ${brandName} on ${domain} due to error:`, error.message);
+      return { genuineMentions: [] };
     }
   }
 

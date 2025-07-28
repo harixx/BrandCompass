@@ -11,7 +11,12 @@ interface LoadingSectionProps {
 export default function LoadingSection({ auditId }: LoadingSectionProps) {
   const { data: audit } = useQuery<Audit>({
     queryKey: ["/api/audit", auditId],
-    refetchInterval: 2000,
+    refetchInterval: (data) => {
+      if (!data) return 1000;
+      if (data.status === "processing") return 2000;
+      if (data.status === "completed" || data.status === "failed") return false;
+      return 3000;
+    },
     enabled: !!auditId
   });
 
@@ -19,8 +24,11 @@ export default function LoadingSection({ auditId }: LoadingSectionProps) {
     return null;
   }
 
-  // Simulate progress based on time elapsed
-  const progress = Math.min(95, Math.random() * 80 + 10);
+  // Calculate real progress based on publications processed
+  const totalPublications = audit.totalPublications || 30;
+  const resultsProcessed = (audit.results as any[])?.length || 0;
+  const progress = Math.round((resultsProcessed / totalPublications) * 100);
+  const mentionsFound = audit.mentionsFound || 0;
 
   return (
     <section className="py-20 bg-white">
@@ -36,8 +44,13 @@ export default function LoadingSection({ auditId }: LoadingSectionProps) {
             
             <div className="mb-8">
               <Progress value={progress} className="w-full h-3 mb-4" />
-              <p className="text-sm text-neutral-500 mb-2">{Math.round(progress)}% complete</p>
-              <p className="text-sm text-neutral-600">Currently checking: major news outlets</p>
+              <p className="text-sm text-neutral-500 mb-2">{progress}% complete</p>
+              <p className="text-sm text-neutral-600">
+                {resultsProcessed > 0 
+                  ? `Processed ${resultsProcessed}/${totalPublications} publications • ${mentionsFound} mentions found`
+                  : "Starting analysis of major news outlets..."
+                }
+              </p>
             </div>
             
             <div className="space-y-4 max-w-lg mx-auto">

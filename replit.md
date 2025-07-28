@@ -115,8 +115,12 @@ The application uses a simple schema with two main entities:
 - **API Configuration**: Set up required environment variables (SERPER_API_KEY, OPENAI_API_KEY)
 - **Enhanced Visualization**: Added interactive pie chart showing coverage analysis with Publications Checked (30), Mentions Found, Missed Opportunities, and Coverage Score vs Industry benchmark (25%)
 - **UI Improvement**: Replaced "Company Overview Report Missing" section with comprehensive Coverage Analysis chart
+- **Performance Optimization**: Implemented parallel batch processing (5 publications simultaneously) reducing audit time from 15+ seconds to ~6 seconds
+- **Smart Polling**: Optimized frontend polling with dynamic intervals - faster during processing, stops when completed
+- **Accuracy Enhancement**: Improved OpenAI analysis with strict validation, better error handling, and enhanced prompts for precise brand mention detection
+- **Real-time Progress**: Added batch-by-batch progress updates with live coverage rate calculations
+- **Error Resilience**: Enhanced error handling to continue processing despite individual publication failures
 - **API Migration**: Switched from SerpAPI to Serper.dev for search functionality using site:domain "brand name" query format
 - **UI Simplification**: Removed SaaS elements (pricing section, sign-in, footer) to focus on tool functionality
 - **Workflow Update**: Strategy recommendations now display after audit completion as requested
-- **Error Handling**: Updated error messages and handling for Serper.dev API integration
 - **Type Safety**: Fixed storage type issues for better development experience

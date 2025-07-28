@@ -22,8 +22,15 @@ export default function ResultsSection({ auditId }: ResultsSectionProps) {
   
   const { data: audit } = useQuery<Audit>({
     queryKey: ["/api/audit", auditId],
-    refetchInterval: 2000,
-    enabled: !!auditId
+    refetchInterval: (data) => {
+      // Smart polling: faster when processing, slower when completed
+      if (!data) return 1000;
+      if (data.status === "processing") return 3000; // Reduced from 2000ms
+      if (data.status === "completed" || data.status === "failed") return false; // Stop polling
+      return 5000; // Default slower polling
+    },
+    enabled: !!auditId,
+    staleTime: 1000 // Consider data stale after 1 second
   });
 
   const handleDownloadPDF = async () => {
@@ -139,7 +146,7 @@ export default function ResultsSection({ auditId }: ResultsSectionProps) {
               </div>
               <div className="text-sm font-medium text-neutral-600 mb-1">Mentions Found</div>
               <div className="text-3xl font-bold text-neutral-900 mb-1">{audit.mentionsFound}</div>
-              <div className="text-xs text-neutral-500">0% coverage</div>
+              <div className="text-xs text-neutral-500">{audit.coverageRate}% coverage</div>
             </Card>
             
             <Card className="bg-white rounded-xl border border-neutral-200 shadow-sm text-center p-6">
