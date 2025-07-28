@@ -104,20 +104,23 @@ async function processAuditAsync(auditId: string, brandName: string) {
         console.log(`Searching ${publication.name} for "${brandName}"`);
         
         const searchResults = await serperService.searchDomain(publication.domain, brandName);
-        const classification = await openaiService.classifyMention(brandName, searchResults);
+        const analysis = await openaiService.analyzeSearchResults(searchResults, brandName, publication.domain);
+        
+        const hasMention = analysis.genuineMentions.length > 0;
+        const firstMention = analysis.genuineMentions[0];
         
         const result: AuditResult = {
           domain: publication.domain,
-          brandMentioned: classification.brandMentioned,
-          title: classification.title,
-          snippet: classification.snippet,
-          url: classification.url,
+          brandMentioned: hasMention,
+          title: firstMention?.title,
+          snippet: firstMention?.snippet,
+          url: firstMention?.url,
           logo: `https://www.google.com/s2/favicons?domain=${publication.domain}&sz=32`
         };
 
         results.push(result);
 
-        if (classification.brandMentioned) {
+        if (hasMention) {
           mentionsFound++;
           mentionedDomains.push(publication.name);
         }
@@ -149,11 +152,11 @@ async function processAuditAsync(auditId: string, brandName: string) {
     }
 
     // Generate strategy recommendations
+    const audit = await storage.getAudit(auditId);
     const strategy = await openaiService.generateStrategy(
+      results,
       brandName,
-      NEWS_PUBLICATIONS.length,
-      mentionsFound,
-      mentionedDomains
+      audit?.websiteUrl || ''
     );
 
     // Find top source
