@@ -82,6 +82,7 @@ export default function PricingSection({ auditId }: PricingSectionProps) {
               <Button 
                 size="lg" 
                 className="w-full bg-neutral-900 hover:bg-neutral-800 text-white font-semibold py-4"
+                onClick={() => window.open('https://pressviz.com/#contact-us', '_blank')}
               >
                 Start with PR Starter →
               </Button>
@@ -147,6 +148,7 @@ export default function PricingSection({ auditId }: PricingSectionProps) {
               <Button 
                 size="lg" 
                 className="w-full bg-brand-blue hover:bg-blue-700 text-white font-semibold py-4"
+                onClick={() => window.open('https://pressviz.com/#contact-us', '_blank')}
               >
                 Go All-In →
               </Button>
