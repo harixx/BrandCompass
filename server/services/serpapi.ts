@@ -19,11 +19,22 @@ export class SerperService {
 
   async searchDomain(domain: string, brandName: string): Promise<SerpResult[]> {
     try {
-      const query = `site:${domain} "${brandName}"`;
-      
-      const response = await axios.post(this.baseUrl, {
-        q: query,
-        num: 10
+      // Enhanced search strategy with multiple query variations for maximum recall
+      const queries = [
+        `site:${domain} "${brandName}"`,                    // Exact match primary
+        `site:${domain} ${brandName}`,                      // Broader match
+        `site:${domain} "${brandName}" OR "${brandName} inc" OR "${brandName} corp"` // Corporate variations
+      ];
+
+      let allResults: SerpResult[] = [];
+      const seenUrls = new Set<string>();
+
+      // Execute primary search with exact brand name
+      const primaryResponse = await axios.post(this.baseUrl, {
+        q: queries[0],
+        num: 15, // Increased from 10 for better coverage
+        gl: 'us', // Geographic location for consistent results
+        hl: 'en'  // Language preference
       }, {
         headers: {
           'X-API-KEY': this.apiKey,
@@ -31,17 +42,58 @@ export class SerperService {
         }
       });
 
-      if (response.data.error) {
-        throw new Error(response.data.error);
+      if (primaryResponse.data.error) {
+        throw new Error(primaryResponse.data.error);
       }
 
-      const organicResults = response.data.organic || [];
+      const primaryResults = primaryResponse.data.organic || [];
       
-      return organicResults.map((result: any) => ({
-        title: result.title || '',
-        snippet: result.snippet || '',
-        link: result.link || ''
-      }));
+      // Process primary results
+      primaryResults.forEach((result: any) => {
+        if (result.link && !seenUrls.has(result.link)) {
+          seenUrls.add(result.link);
+          allResults.push({
+            title: result.title || '',
+            snippet: result.snippet || '',
+            link: result.link || ''
+          });
+        }
+      });
+
+      // If primary search yielded few results, try broader search
+      if (allResults.length < 3) {
+        try {
+          const broadResponse = await axios.post(this.baseUrl, {
+            q: queries[1],
+            num: 10
+          }, {
+            headers: {
+              'X-API-KEY': this.apiKey,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          const broadResults = broadResponse.data.organic || [];
+          
+          // Add unique results from broader search
+          broadResults.forEach((result: any) => {
+            if (result.link && !seenUrls.has(result.link)) {
+              seenUrls.add(result.link);
+              allResults.push({
+                title: result.title || '',
+                snippet: result.snippet || '',
+                link: result.link || ''
+              });
+            }
+          });
+
+        } catch (broadError) {
+          console.log(`Broad search failed for ${brandName} on ${domain}, using primary results only`);
+        }
+      }
+
+      console.log(`Search completed for ${brandName} on ${domain}: ${allResults.length} results found`);
+      return allResults;
 
     } catch (error: any) {
       if (error.response?.status === 401) {
@@ -50,6 +102,8 @@ export class SerperService {
       if (error.response?.status === 429) {
         throw new Error('RATE_LIMIT_EXCEEDED');
       }
+      
+      console.error(`Serper API error for ${brandName} on ${domain}:`, error.message);
       throw new Error(`Serper API error: ${error.message}`);
     }
   }

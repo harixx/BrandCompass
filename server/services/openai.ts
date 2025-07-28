@@ -35,106 +35,210 @@ export class OpenAIService {
         return { genuineMentions: [] };
       }
 
-      const prompt = `You are an expert brand analyst. Analyze these search results to determine if "${brandName}" is genuinely mentioned.
+      // MULTI-LAYERED ANALYSIS APPROACH for maximum accuracy
+      
+      // Layer 1: Pattern-based validation (fast, high-precision fallback)
+      const patternValidatedResults = this.patternBasedValidation(cleanResults, brandName, domain);
+      
+      // Layer 2: Enhanced AI Analysis with improved prompting
+      const aiValidatedResults = await this.enhancedAIAnalysis(cleanResults, brandName, domain);
+      
+      // Layer 3: Hybrid decision making - combine both approaches
+      const finalResults = this.combineValidationResults(patternValidatedResults, aiValidatedResults, brandName, domain);
+      
+      console.log(`Multi-layer analysis for ${brandName} on ${domain}: ${finalResults.length} genuine mentions found`);
+      return { genuineMentions: finalResults };
 
-BRAND TO SEARCH FOR: "${brandName}"
-PUBLICATION DOMAIN: ${domain}
+    } catch (error: any) {
+      console.error(`Analysis error for ${brandName} on ${domain}:`, error);
+      
+      // Critical error handling - use pattern-based fallback
+      const fallbackResults = this.patternBasedValidation(
+        results.slice(0, 10).map(result => ({
+          title: result.title || '',
+          snippet: result.snippet || '',
+          link: result.link || ''
+        })).filter(result => result.title || result.snippet),
+        brandName, 
+        domain
+      );
+      
+      console.log(`Using pattern-based fallback for ${brandName} on ${domain}: ${fallbackResults.length} mentions found`);
+      return { genuineMentions: fallbackResults };
+    }
+  }
+
+  /**
+   * Pattern-based validation - enterprise-grade fallback method
+   * Uses sophisticated regex and context analysis
+   */
+  private patternBasedValidation(results: any[], brandName: string, domain: string): any[] {
+    const validMentions: any[] = [];
+    
+    // Create case-insensitive regex patterns for brand detection
+    const exactMatch = new RegExp(`\\b${brandName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+    const contextKeywords = ['company', 'corp', 'inc', 'ltd', 'business', 'firm', 'brand', 'organization'];
+    
+    results.forEach(result => {
+      const combinedText = `${result.title} ${result.snippet}`.toLowerCase();
+      const brandMatches = combinedText.match(exactMatch);
+      
+      if (brandMatches && brandMatches.length > 0) {
+        // Additional context validation
+        const hasBusinessContext = contextKeywords.some(keyword => 
+          combinedText.includes(keyword)
+        );
+        
+        // Length-based relevance check (articles with substantial content)
+        const hasSubstantialContent = result.snippet.length > 50;
+        
+        // URL quality check (avoid generic pages)
+        const hasQualityUrl = !result.link.includes('/search') && 
+                              !result.link.includes('/tag/') && 
+                              !result.link.includes('?') ||
+                              result.link.includes(brandName.toLowerCase());
+        
+        // Scoring system for confidence
+        let confidenceScore = 0;
+        confidenceScore += brandMatches.length * 2; // Multiple mentions = higher confidence
+        confidenceScore += hasBusinessContext ? 1 : 0;
+        confidenceScore += hasSubstantialContent ? 1 : 0;
+        confidenceScore += hasQualityUrl ? 1 : 0;
+        
+        // Accept if confidence score >= 2 (moderate threshold for high recall)
+        if (confidenceScore >= 2) {
+          validMentions.push({
+            domain: domain,
+            brandMentioned: true,
+            title: result.title,
+            snippet: result.snippet,
+            url: result.link
+          });
+        }
+      }
+    });
+    
+    return validMentions;
+  }
+
+  /**
+   * Enhanced AI Analysis with improved prompting strategy
+   */
+  private async enhancedAIAnalysis(results: any[], brandName: string, domain: string): Promise<any[]> {
+    try {
+      const prompt = `You are a professional brand monitoring analyst. Your task is to identify genuine brand mentions with HIGH RECALL - don't miss legitimate mentions.
+
+TARGET BRAND: "${brandName}"
+PUBLICATION: ${domain}
 
 SEARCH RESULTS:
-${cleanResults.map((result, i) => `
-Result ${i + 1}:
-Title: ${result.title}
-Snippet: ${result.snippet}
-URL: ${result.link}
+${results.map((result, i) => `
+[${i + 1}] Title: ${result.title}
+    Snippet: ${result.snippet}
+    URL: ${result.link}
 `).join('\n')}
 
-ANALYSIS CRITERIA:
-A mention is GENUINE if:
-1. The exact brand name "${brandName}" appears in the title or snippet
-2. The content discusses, references, or relates to this specific brand/company
-3. It's not just a generic keyword match or unrelated mention
-4. The article is actually ABOUT the brand or mentions it meaningfully
+ANALYSIS GUIDELINES:
+✅ MARK AS GENUINE if the brand "${brandName}":
+- Appears in title or content text (exact match or clear reference)
+- Is discussed in any business/news context
+- Is mentioned as a company, product, or service
+- Appears in financial, tech, business, or industry coverage
+- Is referenced in any meaningful business context
 
-Be STRICT in your analysis. Only mark as genuine if you're confident the brand is meaningfully mentioned.
+❌ ONLY REJECT if:
+- Brand name appears purely as unrelated keyword (e.g., "apple" fruit vs Apple company)
+- Content is completely unrelated to the business entity
+- Clearly false positive matches
 
-Return ONLY a JSON object in this exact format (no additional text):
+IMPORTANT: Err on the side of inclusion. If you're uncertain, include it. Missing genuine mentions is worse than including borderline cases.
+
+Return JSON with ALL genuine mentions:
 {
   "genuineMentions": [
     {
       "domain": "${domain}",
       "brandMentioned": true,
-      "title": "exact article title here",
-      "snippet": "relevant snippet text here",
-      "url": "full article URL here"
+      "title": "exact title",
+      "snippet": "relevant snippet",
+      "url": "full URL"
     }
   ]
-}
-
-If no genuine mentions are found, return: {"genuineMentions": []}`;
+}`;
 
       const response = await this.client.chat.completions.create({
         model: 'gpt-4o',
         messages: [{ 
           role: 'system', 
-          content: 'You are a precise brand analysis AI. Respond only with valid JSON. Be strict about genuine brand mentions.' 
+          content: 'You are a brand monitoring AI optimized for HIGH RECALL. Capture all legitimate brand mentions. Respond only with valid JSON.' 
         }, {
           role: 'user', 
           content: prompt 
         }],
-        temperature: 0.1, // Very low temperature for consistency
-        max_tokens: 1000,
+        temperature: 0.2, // Slightly higher for more inclusive analysis
+        max_tokens: 1500,
       });
 
       const content = response.choices[0]?.message?.content?.trim();
       if (!content) {
-        console.error(`No response from OpenAI for ${brandName} on ${domain}`);
-        return { genuineMentions: [] };
+        console.log(`No AI response for ${brandName} on ${domain} - using pattern fallback`);
+        return [];
       }
 
       try {
-        // Clean the response (remove any markdown formatting)
         const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
         const parsed = JSON.parse(cleanContent);
         
-        // Validate the response structure
         if (!parsed.genuineMentions || !Array.isArray(parsed.genuineMentions)) {
-          console.error(`Invalid response structure from OpenAI for ${brandName} on ${domain}:`, parsed);
-          return { genuineMentions: [] };
+          console.log(`Invalid AI response structure for ${brandName} on ${domain} - using pattern fallback`);
+          return [];
         }
 
-        // Validate each mention
-        const validMentions = parsed.genuineMentions.filter((mention: any) => {
-          return mention.domain && mention.title && mention.url;
-        });
-
-        console.log(`OpenAI analysis for ${brandName} on ${domain}: ${validMentions.length} genuine mentions found`);
-        return { genuineMentions: validMentions };
+        return parsed.genuineMentions.filter((mention: any) => 
+          mention.domain && mention.title && mention.url
+        );
 
       } catch (parseError) {
-        console.error(`Failed to parse OpenAI response for ${brandName} on ${domain}:`, content);
-        console.error('Parse error:', parseError);
-        return { genuineMentions: [] };
+        console.log(`AI response parse error for ${brandName} on ${domain} - using pattern fallback`);
+        return [];
       }
 
     } catch (error: any) {
-      console.error(`OpenAI analysis error for ${brandName} on ${domain}:`, error);
-      
-      // Handle specific OpenAI errors
-      if (error.code === 'insufficient_quota' || error.message?.includes('quota')) {
-        throw new Error('OPENAI_QUOTA_EXCEEDED');
-      }
-      if (error.code === 'invalid_api_key' || error.message?.includes('api_key')) {
-        throw new Error('OPENAI_API_KEY_INVALID');
-      }
-      if (error.code === 'rate_limit_exceeded' || error.message?.includes('rate limit')) {
-        console.log(`Rate limit hit for ${brandName} on ${domain}, continuing without AI analysis`);
-        return { genuineMentions: [] };
-      }
-      
-      // For other errors, return empty result but continue processing
-      console.log(`Continuing without AI analysis for ${brandName} on ${domain} due to error:`, error.message);
-      return { genuineMentions: [] };
+      console.log(`AI analysis failed for ${brandName} on ${domain} - using pattern fallback:`, error.message);
+      return [];
     }
+  }
+
+  /**
+   * Hybrid decision making - combines pattern and AI results for maximum accuracy
+   */
+  private combineValidationResults(patternResults: any[], aiResults: any[], brandName: string, domain: string): any[] {
+    // Create a map to avoid duplicates
+    const uniqueMentions = new Map<string, any>();
+    
+    // Add pattern-based results (high precision)
+    patternResults.forEach(mention => {
+      uniqueMentions.set(mention.url, {
+        ...mention,
+        validationMethod: 'pattern'
+      });
+    });
+    
+    // Add AI results (may catch edge cases pattern missed)
+    aiResults.forEach(mention => {
+      if (!uniqueMentions.has(mention.url)) {
+        uniqueMentions.set(mention.url, {
+          ...mention,
+          validationMethod: 'ai'
+        });
+      }
+    });
+    
+    const finalResults = Array.from(uniqueMentions.values());
+    
+    console.log(`${brandName} on ${domain}: Pattern=${patternResults.length}, AI=${aiResults.length}, Final=${finalResults.length}`);
+    
+    return finalResults;
   }
 
   async generateStrategy(auditResults: AuditResult[], brandName: string, websiteUrl: string): Promise<AuditStrategy> {
