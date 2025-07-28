@@ -111,6 +111,7 @@ The application uses a simple schema with two main entities:
 ## Recent Changes (January 2025)
 
 - **Migration Complete**: Successfully migrated from Replit Agent to standard Replit environment
+- **Railway Deployment**: Added proper Railway.app deployment configuration with nixpacks.toml, railway.json, and Procfile
 - **Service Integration**: Created missing OpenAI service module with proper type compatibility
 - **API Configuration**: Set up required environment variables (SERPER_API_KEY, OPENAI_API_KEY)
 - **Enhanced Visualization**: Added interactive pie chart showing coverage analysis with Publications Checked (30), Mentions Found, Missed Opportunities, and Coverage Score vs Industry benchmark (25%)

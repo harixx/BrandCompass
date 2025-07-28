@@ -1,0 +1,17 @@
+node_modules
+.git
+.env
+*.log
+.DS_Store
+.vite
+client/src
+server
+shared
+tsconfig.json
+vite.config.ts
+tailwind.config.ts
+postcss.config.js
+components.json
+debug_search.js
+test_openai_analysis.js
+attached_assets
